@@ -1,17 +1,17 @@
 /**
-* The copyrights, all other intellectual and industrial
-* property rights are retained by XMOS and/or its licensors.
-* Terms and conditions covering the use of this code can
-* be found in the Xmos End User License Agreement.
-*
-* Copyright XMOS Ltd 2012
-*
-* In the case where this code is a modification of existing code
-* under a separate license, the separate license terms are shown
-* below. The modifications to the code are still covered by the
-* copyright notice above.
-*
-**/
+ * The copyrights, all other intellectual and industrial
+ * property rights are retained by XMOS and/or its licensors.
+ * Terms and conditions covering the use of this code can
+ * be found in the Xmos End User License Agreement.
+ *
+ * Copyright XMOS Ltd 2012
+ *
+ * In the case where this code is a modification of existing code
+ * under a separate license, the separate license terms are shown
+ * below. The modifications to the code are still covered by the
+ * copyright notice above.
+ *
+ **/
 
 /*---------------------------------------------------------------------------
  include files
@@ -35,16 +35,14 @@
 /*---------------------------------------------------------------------------
  ports and clocks
  ---------------------------------------------------------------------------*/
-on tile[0]: can_ports p = {XS1_PORT_1L, XS1_PORT_1I, XS1_CLKBLK_1};
-on tile[0]: port shutdown = XS1_PORT_4E;
+//Circle slot CAN node
+on tile[1]: can_ports_t p_can_circle = {XS1_PORT_1L, XS1_PORT_1I, 8, 8, 8, 4};
+on tile[1]: can_clock_t t_can_circle = {2, XS1_CLKBLK_1};
+on tile[1]: port shutdown = XS1_PORT_4E;
+
 on tile[1]: port p_led = XS1_PORT_4A;
 on tile[1]: port p_PORT_BUT_1 = XS1_PORT_4C;
 on tile[1]: struct r_i2c i2cOne = {XS1_PORT_1F, XS1_PORT_1B, 1000};
-
-/*---------------------------------------------------------------------------
- Function prototypes
- ---------------------------------------------------------------------------*/
-void application(streaming chanend c_application);
 
 /*---------------------------------------------------------------------------
  xscope initialization
@@ -58,91 +56,100 @@ void xscope_user_init(void)
 /*---------------------------------------------------------------------------
  implementation
  ---------------------------------------------------------------------------*/
-
-int main()
-{
-  streaming chan c_application;
-  chan c_rx_tx;
-  par
-  {
-    on tile[0]:{
-          shutdown <: 0;
-          can_server(p, c_rx_tx);
-    }
-    on tile[0]: canopen_server(c_rx_tx, c_application);
-    on tile[1]: application(c_application);
-  }
-  return 0;
-}
-
-
-
-/*---------------------------------------------------------------------------
- Application Core
- ---------------------------------------------------------------------------*/
 void application(streaming chanend c_application)
 {
-  unsigned button_press_1, button_press_2, time, time_i2c;
-  int button = 1;
-  char led0 = 0xF, led1 = 0xF, led2 = 0xF, led3 = 0xF;
   timer t, i2c_timer;
-  unsigned char data[1] = {0x13}, pdo_number, pdo_data[2];
-  unsigned char data1[2];
-  int adc_value;
-  p_PORT_BUT_1:> button_press_1;
+  unsigned char data[1] = {0x13}, data1[2], pdo_number, pdo_data[2];
+  unsigned button_press_1, button_press_2, time, time_i2c;
+  int button = 1, adc_value;
+  //char led0 = 0xF, led1 = 0xF, led2 = 0xF, led3 = 0xF;
+
+  p_PORT_BUT_1 :> button_press_1;
   set_port_drive_low(p_PORT_BUT_1);
   i2c_master_write_reg(0x28, 0x00, data, 1, i2cOne); //Write configuration information to ADC
-  t:>time;
+  t :> time;
   i2c_timer :> time_i2c;
+
   while(1)
   {
     select
     {
-      case button=> p_PORT_BUT_1 when pinsneq(button_press_1):> button_press_1: //checks if any button is pressed
-      button=0;
-      t:>time;
-      break;
-
-      case !button => t when timerafter(time+debounce_time):>void: //waits for 20ms and checks if the same button is pressed or not
-      p_PORT_BUT_1:> button_press_2;
-      if(button_press_1==button_press_2)
-      if(button_press_1 == BUTTON_PRESS_VALUE) //Button 1 is pressed
-
+      /*----------------------------------------------------------------------*/
+      case button=> p_PORT_BUT_1 when pinsneq(button_press_1) :> button_press_1:
       {
-        pdo_data[0] = 0xFF;
-        canopen_client_send_data_to_stack(c_application, 1, 1, pdo_data);
+        //checks if any button is pressed
+        button=0;
+        t :> time;
+        break;
       }
-      if(button_press_1 == BUTTON_PRESS_VALUE-1) //Button 2 is pressed
-
+      /*----------------------------------------------------------------------*/
+      case !button => t when timerafter(time+debounce_time) :> void:
       {
-        pdo_data[0] = 0xFF;
-        canopen_client_send_data_to_stack(c_application, 2, 1, pdo_data);
-      }
-      button=1;
-      break;
+        //waits for 20ms and checks if the same button is pressed or not
+        p_PORT_BUT_1:> button_press_2;
+        if(button_press_1==button_press_2)
+        if(button_press_1 == BUTTON_PRESS_VALUE) //Button 1 is pressed
+        {
+          pdo_data[0] = 0xFF;
+          canopen_client_send_data_to_stack(c_application, 1, 1, pdo_data);
+        }
 
-      case c_application:> pdo_number:
+        if(button_press_1 == BUTTON_PRESS_VALUE-1) //Button 2 is pressed
+        {
+          pdo_data[0] = 0xFF;
+          canopen_client_send_data_to_stack(c_application, 2, 1, pdo_data);
+        }
+        button=1;
+        break;
+      }
+      /*----------------------------------------------------------------------*/
+      case c_application :> pdo_number:
       {
         char temp_data;
         char length,data[1];
+
         canopen_client_receive_data_from_stack(c_application, length,data);
+
         if((pdo_number >= 0) && (pdo_number <= 3))
         {
           p_led :> temp_data;
-          p_led <:  (unsigned) ((temp_data ^ (1 << pdo_number)));
+          p_led <: (unsigned) ((temp_data ^ (1 << pdo_number)));
         }
+        break;
       }
-      break;
+      /*----------------------------------------------------------------------*/
+      case i2c_timer when timerafter(time_i2c + TEMP_SENSOR_INTERVAL) :> time_i2c:
+      {
+        i2c_master_rx(0x28, data1, 2, i2cOne); //Read ADC value using I2C read
+        printstrln("Reading Temperature value....");
+        data1[0] = data1[0] & 0x0F;
+        adc_value = (data1[0] << 6) | (data1[1] >> 2);
+        pdo_data[0] = ((adc_value & 0xFF00) >> 8);
+        pdo_data[1] = (adc_value & 0xFF);
+        canopen_client_send_data_to_stack(c_application, 0, 2, pdo_data);
+        break;
+      }
+      /*----------------------------------------------------------------------*/
+    }//select
+  }//while(1)
+}
 
-      case i2c_timer when timerafter(time_i2c + TEMP_SENSOR_INTERVAL):> time_i2c:
-      i2c_master_rx(0x28, data1, 2, i2cOne); //Read ADC value using I2C read
-      printstrln("Reading Temperature value....");
-      data1[0]=data1[0]&0x0F;
-      adc_value=(data1[0]<<6)|(data1[1]>>2);
-      pdo_data[0] = ((adc_value & 0xFF00)>>8);
-      pdo_data[1] = (adc_value & 0xFF);
-      canopen_client_send_data_to_stack(c_application, 0, 2, pdo_data);
-      break;
+/*============================================================================*/
+int main()
+{
+  streaming chan c_application;
+  streaming chan c_rx_tx;
+  par
+  {
+    on tile[1]: canopen_server(c_rx_tx, c_application);
+    on tile[1]: application(c_application);
+    on tile[1]:
+    {
+      shutdown <: 0;
+      can_server(c_rx_tx, p_can_circle, t_can_circle, 16);
     }
   }
+  return 0;
 }
+
+/*============================================================================*/

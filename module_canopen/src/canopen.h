@@ -91,6 +91,6 @@ enum cob_id
 };
 
 
-void canopen_server(chanend c_rx_tx, streaming chanend c_application);
+void canopen_server(streaming chanend c_rx_tx, streaming chanend c_application);
 
 #endif

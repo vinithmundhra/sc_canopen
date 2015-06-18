@@ -17,7 +17,7 @@
  include files
  ---------------------------------------------------------------------------*/
 #include "canopen.h"
-#include "can.h"
+#include "can_util.h"
 #include "emcy.h"
 #include "od.h"
 #include "sdo.h"
@@ -26,13 +26,14 @@
 /*---------------------------------------------------------------------------
  Send Emergency message on to the CAN newtork
  ---------------------------------------------------------------------------*/
-void emcy_send_emergency_message(chanend c_rx_tx,
+void emcy_send_emergency_message(streaming chanend c_rx_tx,
+                                 can_state_t &can_state,
                             char error_type,
                             unsigned emergency_code,
                             REFERENCE_PARAM(unsigned char, error_index_pointer),
                             REFERENCE_PARAM(char, canopen_state))
 {
-  can_frame frame;
+  can_frame_t frame;
   char data_buffer[4];
   char max_error_entries, max_error_behaviour_entries;
   char error_exists = 0, counter = 0;
@@ -93,7 +94,7 @@ void emcy_send_emergency_message(chanend c_rx_tx,
   frame.data[5] = 0;
   frame.data[6] = 0;
   frame.data[7] = 0;
-  can_send_frame(c_rx_tx, frame);
+  can_send_blocking(c_rx_tx, can_state, frame);
 }
 
 

@@ -30,7 +30,8 @@ void sync_pdo_data_transmit(char pdo_number,
                             NULLABLE_ARRAY_OF(tx_sync_timer, sync_timer),
                             NULLABLE_ARRAY_OF(tpdo_inhibit_time,
                                               tpdo_inhibit_time_values),
-                            chanend c_rx_tx);
+                                              streaming chanend c_rx_tx,
+                                              can_state_t &can_state);
 
 /*==========================================================================*/
 /**

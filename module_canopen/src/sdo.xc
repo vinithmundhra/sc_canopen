@@ -17,19 +17,20 @@
  include files
  ---------------------------------------------------------------------------*/
 #include "canopen.h"
-#include "can.h"
+#include "can_util.h"
 
 /*---------------------------------------------------------------------------
  Upload Expedited Data
  ---------------------------------------------------------------------------*/
-void sdo_upload_expedited_data(chanend c_rx_tx,
+void sdo_upload_expedited_data(streaming chanend c_rx_tx,
+                               can_state_t &can_state,
                            int od_index,
                            char od_sub_index,
                            char data_length,
                            char data_buffer[])
 {
   char count = 0;
-  can_frame frame;
+  can_frame_t frame;
   if (data_length <= 4)
   {
     frame.id = TSDO_MESSAGE;
@@ -48,7 +49,7 @@ void sdo_upload_expedited_data(chanend c_rx_tx,
         frame.data[count + 4] = 0;
       count++;
     }
-    can_send_frame(c_rx_tx, frame);
+    can_send_blocking(c_rx_tx, can_state, frame);
   }
 }
 
@@ -57,9 +58,10 @@ void sdo_upload_expedited_data(chanend c_rx_tx,
  ---------------------------------------------------------------------------*/
 void sdo_send_download_response(int od_index,
                                 char od_sub_index,
-                                chanend c_rx_tx)
+                                streaming chanend c_rx_tx,
+                                can_state_t &can_state)
 {
-  can_frame frame;
+  can_frame_t frame;
   frame.id = TSDO_MESSAGE;
   frame.extended = 0;
   frame.remote = 0;
@@ -72,15 +74,15 @@ void sdo_send_download_response(int od_index,
   frame.data[5] = 0;
   frame.data[6] = 0;
   frame.data[7] = 0;
-  can_send_frame(c_rx_tx, frame);
+  can_send_blocking(c_rx_tx, can_state, frame);
 }
 
 /*---------------------------------------------------------------------------
  Download SDO Segmented Data
  ---------------------------------------------------------------------------*/
-void sdo_download_segment_response(chanend c_rx_tx, char sdo_toggle)
+void sdo_download_segment_response(streaming chanend c_rx_tx, can_state_t &can_state, char sdo_toggle)
 {
-  can_frame frame;
+  can_frame_t frame;
   frame.id = TSDO_MESSAGE;
   frame.extended = 0;
   frame.remote = 0;
@@ -93,18 +95,19 @@ void sdo_download_segment_response(chanend c_rx_tx, char sdo_toggle)
   frame.data[5] = 0;
   frame.data[6] = 0;
   frame.data[7] = 0;
-  can_send_frame(c_rx_tx, frame);
+  can_send_blocking(c_rx_tx, can_state, frame);
 }
 
 /*---------------------------------------------------------------------------
  Initiate SDO Upload Response
  ---------------------------------------------------------------------------*/
-void sdo_initiate_upload_response(chanend c_rx_tx,
+void sdo_initiate_upload_response(streaming chanend c_rx_tx,
+                                  can_state_t &can_state,
                                   int od_index,
                                   char od_sub_index,
                                   char data_length)
 {
-  can_frame frame;
+  can_frame_t frame;
   frame.id = TSDO_MESSAGE;
   frame.extended = 0;
   frame.remote = 0;
@@ -117,13 +120,14 @@ void sdo_initiate_upload_response(chanend c_rx_tx,
   frame.data[5] = 0;
   frame.data[6] = 0;
   frame.data[7] = 0;
-  can_send_frame(c_rx_tx, frame);
+  can_send_blocking(c_rx_tx, can_state, frame);
 }
 
 /*---------------------------------------------------------------------------
  Upload Segmented Data
  ---------------------------------------------------------------------------*/
-void sdo_upload_segmented_data(chanend c_rx_tx,
+void sdo_upload_segmented_data(streaming chanend c_rx_tx,
+                               can_state_t &can_state,
                            int od_index,
                            char od_sub_index,
                            char sdo_toggle,
@@ -131,7 +135,7 @@ void sdo_upload_segmented_data(chanend c_rx_tx,
                            char data_buffer[],
                            char segment_number)
 {
-  can_frame frame;
+  can_frame_t frame;
   char no_of_segments = 0, no_of_data_bytes, counter = 0;
   if (data_length % 7 == 0)
     no_of_segments = data_length / 7;
@@ -169,15 +173,15 @@ void sdo_upload_segmented_data(chanend c_rx_tx,
   frame.remote = 0;
   frame.dlc = 8;
   frame.data[0] = 0x00 | (sdo_toggle << 4);
-  can_send_frame(c_rx_tx, frame);
+  can_send_blocking(c_rx_tx, can_state, frame);
 }
 
 /*---------------------------------------------------------------------------
  Transmit SDO Abort code
  ---------------------------------------------------------------------------*/
-void sdo_send_abort_code(int index, char si, unsigned error, chanend c_rx_tx)
+void sdo_send_abort_code(int index, char si, unsigned error, streaming chanend c_rx_tx, can_state_t &can_state)
 {
-  can_frame frame;
+  can_frame_t frame;
   frame.dlc = 8;
   frame.extended = 0;
   frame.remote = 0;
@@ -190,5 +194,5 @@ void sdo_send_abort_code(int index, char si, unsigned error, chanend c_rx_tx)
   frame.data[5] = ((error >> 8) & 0xFF);
   frame.data[6] = ((error >> 16) & 0xFF);
   frame.data[7] = ((error >> 24) & 0xFF);
-  can_send_frame(c_rx_tx, frame);
+  can_send_blocking(c_rx_tx, can_state, frame);
 }

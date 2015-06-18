@@ -46,7 +46,7 @@ enum lss_bit_rate
  * \param c_rx_tx channel to communicate with bus module like CAN
  * \return none
  **/
-void lss_send_node_id(chanend c_rx_tx);
+void lss_send_node_id(streaming chanend c_rx_tx, can_state_t &can_state);
 
 /*==========================================================================*/
 /**
@@ -57,7 +57,7 @@ void lss_send_node_id(chanend c_rx_tx);
  * \param configuration_status current configuration status
  * \return none
  **/
-void lss_configure_node_id_response(chanend c_rx_tx, char configuration_status);
+void lss_configure_node_id_response(streaming chanend c_rx_tx, can_state_t &can_state, char configuration_status);
 
 /*==========================================================================*/
 /**
@@ -68,7 +68,8 @@ void lss_configure_node_id_response(chanend c_rx_tx, char configuration_status);
  * \param configuration_status current configuration status
  * \return none
  **/
-void lss_configure_bit_timing_response(chanend c_rx_tx,
+void lss_configure_bit_timing_response(streaming chanend c_rx_tx,
+                                       can_state_t &can_state,
                                        char configuration_status);
 
 /*==========================================================================*/
@@ -80,7 +81,8 @@ void lss_configure_bit_timing_response(chanend c_rx_tx,
  * \param configuration_status current configuration status
  * \return none
  **/
-void lss_store_config_settings_response(chanend c_rx_tx,
+void lss_store_config_settings_response(streaming chanend c_rx_tx,
+                                        can_state_t &can_state,
                                         char configuration_status);
 
 /*==========================================================================*/
@@ -93,7 +95,8 @@ void lss_store_config_settings_response(chanend c_rx_tx,
  * \param error_index_pointer Pointer pointing to the error register
  * \return none
  **/
-void lss_inquire_vendor_id_response(chanend c_rx_tx,
+void lss_inquire_vendor_id_response(streaming chanend c_rx_tx,
+                                    can_state_t &can_state,
                                     REFERENCE_PARAM(char, canopen_state),
                                     REFERENCE_PARAM(unsigned char,
                                                     error_index_pointer));
@@ -108,7 +111,8 @@ void lss_inquire_vendor_id_response(chanend c_rx_tx,
  * \param error_index_pointer Pointer pointing to the error register
  * \return none
  **/
-void lss_inquire_product_code(chanend c_rx_tx,
+void lss_inquire_product_code(streaming chanend c_rx_tx,
+                              can_state_t &can_state,
                               REFERENCE_PARAM(char, canopen_state),
                               REFERENCE_PARAM(unsigned char,
                                               error_index_pointer));
@@ -123,7 +127,8 @@ void lss_inquire_product_code(chanend c_rx_tx,
  * \param error_index_pointer Pointer pointing to the error register
  * \return none
  **/
-void lss_inquire_revision_number(chanend c_rx_tx,
+void lss_inquire_revision_number(streaming chanend c_rx_tx,
+                                 can_state_t &can_state,
                                  REFERENCE_PARAM(char, canopen_state),
                                  REFERENCE_PARAM(unsigned char,
                                                  error_index_pointer));
@@ -138,7 +143,8 @@ void lss_inquire_revision_number(chanend c_rx_tx,
  * \param error_index_pointer Pointer pointing to the error register
  * \return none
  **/
-void lss_inquire_serial_number(chanend c_rx_tx,
+void lss_inquire_serial_number(streaming chanend c_rx_tx,
+                               can_state_t &can_state,
                                REFERENCE_PARAM(char, canopen_state),
                                REFERENCE_PARAM(unsigned char,
                                                error_index_pointer));

@@ -60,7 +60,8 @@ enum sdo_abort_codes
 * \param data_buffer data to be uploaded
 * \return none
 **/
-void sdo_upload_expedited_data(chanend c_rx_tx,
+void sdo_upload_expedited_data(streaming chanend c_rx_tx,
+                               can_state_t &can_state,
                            int od_index,
                            char od_sub_index,
                            char data_length,
@@ -78,7 +79,8 @@ void sdo_upload_expedited_data(chanend c_rx_tx,
 **/
 void sdo_send_download_response(int od_index,
                                 char od_sub_index,
-                                chanend c_rx_tx);
+                                streaming chanend c_rx_tx,
+                                can_state_t &can_state);
 
 /*==========================================================================*/
 /**
@@ -89,7 +91,7 @@ void sdo_send_download_response(int od_index,
 * \param sdo_toggle toggle bit to check the toggle response
 * \return none
 **/
-void sdo_download_segment_response(chanend c_rx_tx, char sdo_toggle);
+void sdo_download_segment_response(streaming chanend c_rx_tx, can_state_t &can_state, char sdo_toggle);
 
 
 /*==========================================================================*/
@@ -103,7 +105,8 @@ void sdo_download_segment_response(chanend c_rx_tx, char sdo_toggle);
 * \param data_length data length of object to be uploaded
 * \return none
 **/
-void sdo_initiate_upload_response(chanend c_rx_tx,
+void sdo_initiate_upload_response(streaming chanend c_rx_tx,
+                                  can_state_t &can_state,
                                   int od_index,
                                   char od_sub_index,
                                   char data_length);
@@ -121,7 +124,8 @@ void sdo_initiate_upload_response(chanend c_rx_tx,
 * \param segment_number data segment number
 * \return none
 **/
-void sdo_upload_segmented_data(chanend c_rx_tx,
+void sdo_upload_segmented_data(streaming chanend c_rx_tx,
+                               can_state_t &can_state,
                            int od_index,
                            char od_sub_index,
                            char sdo_toggle,
@@ -141,6 +145,6 @@ void sdo_upload_segmented_data(chanend c_rx_tx,
 * \param c_rx_tx channel to communicate with bus module like CAN
 * \return none
 **/
-void sdo_send_abort_code(int index, char si, unsigned error, chanend c_rx_tx);
+void sdo_send_abort_code(int index, char si, unsigned error, streaming chanend c_rx_tx, can_state_t &can_state);
 
 #endif /* sdo_h_ */

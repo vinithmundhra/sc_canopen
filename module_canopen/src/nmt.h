@@ -38,8 +38,9 @@ void nmt_initialize(NULLABLE_ARRAY_OF(tx_sync_timer, sync_timer),
 * \param canopen_state current state of canopen node
 * \return none
 **/
-void nmt_send_heartbeat_message(chanend c_rx_tx,
-                            can_frame frame,
+void nmt_send_heartbeat_message(streaming chanend c_rx_tx,
+                                can_state_t &can_state,
+                            can_frame_t frame,
                             unsigned char canopen_state);
 
 /*==========================================================================*/
@@ -53,8 +54,9 @@ void nmt_send_heartbeat_message(chanend c_rx_tx,
 * \param state current state of canopen node
 * \return none
 **/
-void nmt_send_nodeguard_message(chanend c_rx_tx,
-                            can_frame frame,
+void nmt_send_nodeguard_message(streaming chanend c_rx_tx,
+                                can_state_t &can_state,
+                            can_frame_t frame,
                             char toggle,
                             unsigned char state);
 
@@ -66,7 +68,7 @@ void nmt_send_nodeguard_message(chanend c_rx_tx,
 * \param c_rx_tx channel to communicate with bus module like CAN
 * \return none
 **/
-void nmt_send_boot_up_message(chanend c_rx_tx);
+void nmt_send_boot_up_message(streaming chanend c_rx_tx, can_state_t &can_state);
 
 /*==========================================================================*/
 /**

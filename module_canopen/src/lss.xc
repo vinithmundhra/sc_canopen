@@ -20,16 +20,16 @@
 #include "canopen.h"
 #include "lss.h"
 #include "od.h"
-#include "can.h"
+#include "can_util.h"
 #include "emcy.h"
 
 
 /*---------------------------------------------------------------------------
  Send LSS node ID to the LSS master
  ---------------------------------------------------------------------------*/
-void lss_send_node_id(chanend c_rx_tx)
+void lss_send_node_id(streaming chanend c_rx_tx, can_state_t &can_state)
 {
-  can_frame frame;
+  can_frame_t frame;
   frame.dlc = 8;
   frame.id = TLSS_MESSAGE;
   frame.remote = 0;
@@ -42,15 +42,15 @@ void lss_send_node_id(chanend c_rx_tx)
   frame.data[5] = 0;
   frame.data[6] = 0;
   frame.data[7] = 0;
-  can_send_frame(c_rx_tx, frame);
+  can_send_blocking(c_rx_tx, can_state, frame);
 }
 
 /*---------------------------------------------------------------------------
  Configure LSS node id based on configure command send by the LSS master
  ---------------------------------------------------------------------------*/
-void lss_configure_node_id_response(chanend c_rx_tx, char configuration_status)
+void lss_configure_node_id_response(streaming chanend c_rx_tx, can_state_t &can_state, char configuration_status)
 {
-  can_frame frame;
+  can_frame_t frame;
   frame.dlc = 8;
   frame.id = TLSS_MESSAGE;
   frame.remote = 0;
@@ -66,16 +66,17 @@ void lss_configure_node_id_response(chanend c_rx_tx, char configuration_status)
   frame.data[5] = 0;
   frame.data[6] = 0;
   frame.data[7] = 0;
-  can_send_frame(c_rx_tx, frame);
+  can_send_blocking(c_rx_tx, can_state, frame);
 }
 
 /*---------------------------------------------------------------------------
  Configure LSS bit time based on configure command send by the LSS master
  ---------------------------------------------------------------------------*/
-void lss_configure_bit_timing_response(chanend c_rx_tx,
+void lss_configure_bit_timing_response(streaming chanend c_rx_tx,
+                                       can_state_t &can_state,
                                        char configuration_status)
 {
-  can_frame frame;
+  can_frame_t frame;
   frame.dlc = 8;
   frame.id = TLSS_MESSAGE;
   frame.remote = 0;
@@ -91,16 +92,17 @@ void lss_configure_bit_timing_response(chanend c_rx_tx,
   frame.data[5] = 0;
   frame.data[6] = 0;
   frame.data[7] = 0;
-  can_send_frame(c_rx_tx, frame);
+  can_send_blocking(c_rx_tx, can_state, frame);
 }
 
 /*---------------------------------------------------------------------------
  Store LSS settings based on store command send by the LSS master
  ---------------------------------------------------------------------------*/
-void lss_store_config_settings_response(chanend c_rx_tx,
+void lss_store_config_settings_response(streaming chanend c_rx_tx,
+                                        can_state_t &can_state,
                                         char configuration_status)
 {
-  can_frame frame;
+  can_frame_t frame;
   frame.dlc = 8;
   frame.id = TLSS_MESSAGE;
   frame.remote = 0;
@@ -116,20 +118,21 @@ void lss_store_config_settings_response(chanend c_rx_tx,
   frame.data[5] = 0;
   frame.data[6] = 0;
   frame.data[7] = 0;
-  can_send_frame(c_rx_tx, frame);
+  can_send_blocking(c_rx_tx, can_state, frame);
 }
 
 /*---------------------------------------------------------------------------
  Send LSS Vendor ID based on LSS master Inquiry
  ---------------------------------------------------------------------------*/
-void lss_inquire_vendor_id_response(chanend c_rx_tx,
+void lss_inquire_vendor_id_response(streaming chanend c_rx_tx,
+                                    can_state_t &can_state,
                                     REFERENCE_PARAM(char, canopen_state),
                                     REFERENCE_PARAM(unsigned char,
                                                     error_index_pointer))
 {
   int index = od_find_index(IDENTITY_OBJECT);
   char data_buffer[4];
-  can_frame frame;
+  can_frame_t frame;
   if (index != -1)
   {
     od_read_data(index, 1, data_buffer, 4);
@@ -145,11 +148,12 @@ void lss_inquire_vendor_id_response(chanend c_rx_tx,
     frame.data[5] = 0;
     frame.data[6] = 0;
     frame.data[7] = 0;
-    can_send_frame(c_rx_tx, frame);
+    can_send_blocking(c_rx_tx, can_state, frame);
   }
   else
   {
     emcy_send_emergency_message(c_rx_tx,
+                                can_state,
                                 ERR_TYPE_COMMUNICATION_ERROR,
                                 PROTOCOL_ERROR_GENERIC,
                                 error_index_pointer,
@@ -160,14 +164,15 @@ void lss_inquire_vendor_id_response(chanend c_rx_tx,
 /*---------------------------------------------------------------------------
  Send LSS Product code based on LSS master Inquiry
  ---------------------------------------------------------------------------*/
-void lss_inquire_product_code(chanend c_rx_tx,
+void lss_inquire_product_code(streaming chanend c_rx_tx,
+                              can_state_t &can_state,
                               REFERENCE_PARAM(char, canopen_state),
                               REFERENCE_PARAM(unsigned char,
                                               error_index_pointer))
 {
   int index = od_find_index(IDENTITY_OBJECT);
   char data_buffer[4];
-  can_frame frame;
+  can_frame_t frame;
   if (index != -1)
   {
     od_read_data(index, 2, data_buffer, 4);
@@ -183,11 +188,12 @@ void lss_inquire_product_code(chanend c_rx_tx,
     frame.data[5] = 0;
     frame.data[6] = 0;
     frame.data[7] = 0;
-    can_send_frame(c_rx_tx, frame);
+    can_send_blocking(c_rx_tx, can_state, frame);
   }
   else
   {
     emcy_send_emergency_message(c_rx_tx,
+                                can_state,
                                 ERR_TYPE_COMMUNICATION_ERROR,
                                 PROTOCOL_ERROR_GENERIC,
                                 error_index_pointer,
@@ -198,14 +204,15 @@ void lss_inquire_product_code(chanend c_rx_tx,
 /*---------------------------------------------------------------------------
  Send LSS Revision Number based on LSS master Inquiry
  ---------------------------------------------------------------------------*/
-void lss_inquire_revision_number(chanend c_rx_tx,
+void lss_inquire_revision_number(streaming chanend c_rx_tx,
+                                 can_state_t &can_state,
                                  REFERENCE_PARAM(char, canopen_state),
                                  REFERENCE_PARAM(unsigned char,
                                                  error_index_pointer))
 {
   int index = od_find_index(IDENTITY_OBJECT);
   char data_buffer[4];
-  can_frame frame;
+  can_frame_t frame;
   if (index != -1)
   {
     od_read_data(index, 3, data_buffer, 4);
@@ -221,11 +228,12 @@ void lss_inquire_revision_number(chanend c_rx_tx,
     frame.data[5] = 0;
     frame.data[6] = 0;
     frame.data[7] = 0;
-    can_send_frame(c_rx_tx, frame);
+    can_send_blocking(c_rx_tx, can_state, frame);
   }
   else
   {
     emcy_send_emergency_message(c_rx_tx,
+                                can_state,
                                 ERR_TYPE_COMMUNICATION_ERROR,
                                 PROTOCOL_ERROR_GENERIC,
                                 error_index_pointer,
@@ -236,14 +244,15 @@ void lss_inquire_revision_number(chanend c_rx_tx,
 /*---------------------------------------------------------------------------
  Send LSS Serial Number based on LSS master Inquiry
  ---------------------------------------------------------------------------*/
-void lss_inquire_serial_number(chanend c_rx_tx,
+void lss_inquire_serial_number(streaming chanend c_rx_tx,
+                               can_state_t &can_state,
                                REFERENCE_PARAM(char, canopen_state),
                                REFERENCE_PARAM(unsigned char,
                                                error_index_pointer))
 {
   int index = od_find_index(IDENTITY_OBJECT);
   char data_buffer[4];
-  can_frame frame;
+  can_frame_t frame;
   if (index != -1)
   {
     od_read_data(index, 4, data_buffer, 4);
@@ -259,11 +268,12 @@ void lss_inquire_serial_number(chanend c_rx_tx,
     frame.data[5] = 0;
     frame.data[6] = 0;
     frame.data[7] = 0;
-    can_send_frame(c_rx_tx, frame);
+    can_send_blocking(c_rx_tx, can_state, frame);
   }
   else
   {
     emcy_send_emergency_message(c_rx_tx,
+                                can_state,
                                 ERR_TYPE_COMMUNICATION_ERROR,
                                 PROTOCOL_ERROR_GENERIC,
                                 error_index_pointer,

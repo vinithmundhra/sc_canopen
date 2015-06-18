@@ -94,7 +94,8 @@ unsigned pdo_find_cob_id(int address);
 **/
 void pdo_transmit_data(unsigned comm_parameter,
                        unsigned mapping_parameter,
-                       chanend c_rx_tx);
+                       streaming chanend c_rx_tx,
+                       can_state_t &can_state);
 
 /*==========================================================================*/
 /**
@@ -126,7 +127,8 @@ void pdo_receive_application_data(char pdo_number,
                               char length,
                               char data[],
                               NULLABLE_ARRAY_OF(tpdo_inhibit_time, tpdo_inhibit_time_values),
-                              chanend c_rx_tx);
+                              streaming chanend c_rx_tx,
+                              can_state_t &can_state);
 
 /*==========================================================================*/
 /**
