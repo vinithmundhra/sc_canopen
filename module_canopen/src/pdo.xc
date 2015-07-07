@@ -16,7 +16,7 @@
 /*---------------------------------------------------------------------------
  include files
  ---------------------------------------------------------------------------*/
-#include "can_util.h"
+#include "can.h"
 #include "pdo.h"
 #include "od.h"
 
@@ -26,7 +26,7 @@
 void pdo_transmit_data(unsigned comm_parameter,
                        unsigned mapping_parameter,
                        streaming chanend c_rx_tx,
-                       can_state_t &can_state)
+                       can_state_t can_state)
 {
   char data[8];
   can_frame_t frame;
@@ -50,7 +50,7 @@ void pdo_transmit_data(unsigned comm_parameter,
         frame.data[(int)counter] = 0;
       counter++;
     }
-    can_send_blocking(c_rx_tx, can_state, frame);
+    while(can_send(can_state, frame) != 0);
   }
 }
 
@@ -62,7 +62,7 @@ void pdo_receive_application_data(char pdo_number,
                                   char data[],
                                   NULLABLE_ARRAY_OF(tpdo_inhibit_time, tpdo_inhibit_time_values),
                                   streaming chanend c_rx_tx,
-                                  can_state_t &can_state)
+                                  can_state_t can_state)
 {
   char tx_type;
   unsigned cob_id;

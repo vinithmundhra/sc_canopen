@@ -17,13 +17,12 @@
  include files
  ---------------------------------------------------------------------------*/
 #include "canopen.h"
-#include "can_util.h"
 
 /*---------------------------------------------------------------------------
  Upload Expedited Data
  ---------------------------------------------------------------------------*/
 void sdo_upload_expedited_data(streaming chanend c_rx_tx,
-                               can_state_t &can_state,
+                               can_state_t can_state,
                            int od_index,
                            char od_sub_index,
                            char data_length,
@@ -49,7 +48,7 @@ void sdo_upload_expedited_data(streaming chanend c_rx_tx,
         frame.data[count + 4] = 0;
       count++;
     }
-    can_send_blocking(c_rx_tx, can_state, frame);
+    while(can_send(can_state, frame) != 0);
   }
 }
 
@@ -59,7 +58,7 @@ void sdo_upload_expedited_data(streaming chanend c_rx_tx,
 void sdo_send_download_response(int od_index,
                                 char od_sub_index,
                                 streaming chanend c_rx_tx,
-                                can_state_t &can_state)
+                                can_state_t can_state)
 {
   can_frame_t frame;
   frame.id = TSDO_MESSAGE;
@@ -74,13 +73,13 @@ void sdo_send_download_response(int od_index,
   frame.data[5] = 0;
   frame.data[6] = 0;
   frame.data[7] = 0;
-  can_send_blocking(c_rx_tx, can_state, frame);
+  while(can_send(can_state, frame) != 0);
 }
 
 /*---------------------------------------------------------------------------
  Download SDO Segmented Data
  ---------------------------------------------------------------------------*/
-void sdo_download_segment_response(streaming chanend c_rx_tx, can_state_t &can_state, char sdo_toggle)
+void sdo_download_segment_response(streaming chanend c_rx_tx, can_state_t can_state, char sdo_toggle)
 {
   can_frame_t frame;
   frame.id = TSDO_MESSAGE;
@@ -95,14 +94,14 @@ void sdo_download_segment_response(streaming chanend c_rx_tx, can_state_t &can_s
   frame.data[5] = 0;
   frame.data[6] = 0;
   frame.data[7] = 0;
-  can_send_blocking(c_rx_tx, can_state, frame);
+  while(can_send(can_state, frame) != 0);
 }
 
 /*---------------------------------------------------------------------------
  Initiate SDO Upload Response
  ---------------------------------------------------------------------------*/
 void sdo_initiate_upload_response(streaming chanend c_rx_tx,
-                                  can_state_t &can_state,
+                                  can_state_t can_state,
                                   int od_index,
                                   char od_sub_index,
                                   char data_length)
@@ -120,14 +119,14 @@ void sdo_initiate_upload_response(streaming chanend c_rx_tx,
   frame.data[5] = 0;
   frame.data[6] = 0;
   frame.data[7] = 0;
-  can_send_blocking(c_rx_tx, can_state, frame);
+  while(can_send(can_state, frame) != 0);
 }
 
 /*---------------------------------------------------------------------------
  Upload Segmented Data
  ---------------------------------------------------------------------------*/
 void sdo_upload_segmented_data(streaming chanend c_rx_tx,
-                               can_state_t &can_state,
+                               can_state_t can_state,
                            int od_index,
                            char od_sub_index,
                            char sdo_toggle,
@@ -173,13 +172,13 @@ void sdo_upload_segmented_data(streaming chanend c_rx_tx,
   frame.remote = 0;
   frame.dlc = 8;
   frame.data[0] = 0x00 | (sdo_toggle << 4);
-  can_send_blocking(c_rx_tx, can_state, frame);
+  while(can_send(can_state, frame) != 0);
 }
 
 /*---------------------------------------------------------------------------
  Transmit SDO Abort code
  ---------------------------------------------------------------------------*/
-void sdo_send_abort_code(int index, char si, unsigned error, streaming chanend c_rx_tx, can_state_t &can_state)
+void sdo_send_abort_code(int index, char si, unsigned error, streaming chanend c_rx_tx, can_state_t can_state)
 {
   can_frame_t frame;
   frame.dlc = 8;
@@ -194,5 +193,5 @@ void sdo_send_abort_code(int index, char si, unsigned error, streaming chanend c
   frame.data[5] = ((error >> 8) & 0xFF);
   frame.data[6] = ((error >> 16) & 0xFF);
   frame.data[7] = ((error >> 24) & 0xFF);
-  can_send_blocking(c_rx_tx, can_state, frame);
+  while(can_send(can_state, frame) != 0);
 }

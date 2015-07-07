@@ -46,7 +46,7 @@ enum lss_bit_rate
  * \param c_rx_tx channel to communicate with bus module like CAN
  * \return none
  **/
-void lss_send_node_id(streaming chanend c_rx_tx, can_state_t &can_state);
+void lss_send_node_id(streaming chanend c_rx_tx, can_state_t can_state);
 
 /*==========================================================================*/
 /**
@@ -57,7 +57,7 @@ void lss_send_node_id(streaming chanend c_rx_tx, can_state_t &can_state);
  * \param configuration_status current configuration status
  * \return none
  **/
-void lss_configure_node_id_response(streaming chanend c_rx_tx, can_state_t &can_state, char configuration_status);
+void lss_configure_node_id_response(streaming chanend c_rx_tx, can_state_t can_state, char configuration_status);
 
 /*==========================================================================*/
 /**
@@ -69,7 +69,7 @@ void lss_configure_node_id_response(streaming chanend c_rx_tx, can_state_t &can_
  * \return none
  **/
 void lss_configure_bit_timing_response(streaming chanend c_rx_tx,
-                                       can_state_t &can_state,
+                                       can_state_t can_state,
                                        char configuration_status);
 
 /*==========================================================================*/
@@ -82,7 +82,7 @@ void lss_configure_bit_timing_response(streaming chanend c_rx_tx,
  * \return none
  **/
 void lss_store_config_settings_response(streaming chanend c_rx_tx,
-                                        can_state_t &can_state,
+                                        can_state_t can_state,
                                         char configuration_status);
 
 /*==========================================================================*/
@@ -96,7 +96,7 @@ void lss_store_config_settings_response(streaming chanend c_rx_tx,
  * \return none
  **/
 void lss_inquire_vendor_id_response(streaming chanend c_rx_tx,
-                                    can_state_t &can_state,
+                                    can_state_t can_state,
                                     REFERENCE_PARAM(char, canopen_state),
                                     REFERENCE_PARAM(unsigned char,
                                                     error_index_pointer));
@@ -112,7 +112,7 @@ void lss_inquire_vendor_id_response(streaming chanend c_rx_tx,
  * \return none
  **/
 void lss_inquire_product_code(streaming chanend c_rx_tx,
-                              can_state_t &can_state,
+                              can_state_t can_state,
                               REFERENCE_PARAM(char, canopen_state),
                               REFERENCE_PARAM(unsigned char,
                                               error_index_pointer));
@@ -128,7 +128,7 @@ void lss_inquire_product_code(streaming chanend c_rx_tx,
  * \return none
  **/
 void lss_inquire_revision_number(streaming chanend c_rx_tx,
-                                 can_state_t &can_state,
+                                 can_state_t can_state,
                                  REFERENCE_PARAM(char, canopen_state),
                                  REFERENCE_PARAM(unsigned char,
                                                  error_index_pointer));
@@ -144,7 +144,7 @@ void lss_inquire_revision_number(streaming chanend c_rx_tx,
  * \return none
  **/
 void lss_inquire_serial_number(streaming chanend c_rx_tx,
-                               can_state_t &can_state,
+                               can_state_t can_state,
                                REFERENCE_PARAM(char, canopen_state),
                                REFERENCE_PARAM(unsigned char,
                                                error_index_pointer));

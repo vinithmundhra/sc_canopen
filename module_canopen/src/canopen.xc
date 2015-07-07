@@ -36,7 +36,7 @@ receive_rpdo_message(unsigned char canopen_state,
                      NULLABLE_ARRAY_OF(tx_sync_timer, sync_timer),
                      REFERENCE_PARAM(char, error_index_pointer),
                      streaming chanend c_rx_tx,
-                     can_state_t &can_state,
+                     can_state_t can_state,
                      streaming chanend c_application);
 
 static void
@@ -45,13 +45,13 @@ static void
                              NULLABLE_ARRAY_OF(tx_sync_timer, sync_timer),
                              NULLABLE_ARRAY_OF(tpdo_inhibit_time, tpdo_inhibit_time_values),
                              streaming chanend c_rx_tx,
-                             can_state_t &can_state);
+                             can_state_t can_state);
 
 static void
 lss_state_machine(can_frame_t frame,
                   char lss_configuration_mode,
                   streaming chanend c_rx_tx,
-                  can_state_t &can_state,
+                  can_state_t can_state,
                   REFERENCE_PARAM(char, canopen_state),
                   REFERENCE_PARAM(unsigned char, error_index_pointer));
 
@@ -187,9 +187,11 @@ void canopen_server(streaming chanend c_rx_tx, streaming chanend c_application)
     {
       case can_event(c_rx_tx):
       {
+        unsigned pending_events = can_get_num_pending_events(can_state);
         while(can_get_num_pending_events(can_state))
         {
-          if(can_get_event(can_state) == E_RX_SUCCESS)
+          can_event_type_t e = can_get_event(can_state);
+          if(e == E_RX_SUCCESS)
           {
             can_recv(can_state, frame);
             can_rx_flag = 1;
@@ -774,7 +776,7 @@ static void receive_rpdo_message(unsigned char canopen_state,
                                  NULLABLE_ARRAY_OF(tx_sync_timer, sync_timer),
                                  REFERENCE_PARAM(char, error_index_pointer),
                                  streaming chanend c_rx_tx,
-                                 can_state_t &can_state,
+                                 can_state_t can_state,
                                  streaming chanend c_application)
 {
   if (canopen_state == OPERATIONAL)
@@ -833,7 +835,7 @@ static void receive_tpdo_rtr_request(can_frame_t frame,
                                      NULLABLE_ARRAY_OF(tx_sync_timer, sync_timer),
                                      NULLABLE_ARRAY_OF(tpdo_inhibit_time, tpdo_inhibit_time_values),
                                      streaming chanend c_rx_tx,
-                                     can_state_t &can_state)
+                                     can_state_t can_state)
 {
   if (frame.remote == TRUE)
   {
@@ -849,7 +851,7 @@ static void receive_tpdo_rtr_request(can_frame_t frame,
 static void lss_state_machine(can_frame_t frame,
                               char lss_configuration_mode,
                               streaming chanend c_rx_tx,
-                              can_state_t &can_state,
+                              can_state_t can_state,
                               REFERENCE_PARAM(char, canopen_state),
                               REFERENCE_PARAM(unsigned char, error_index_pointer))
 {

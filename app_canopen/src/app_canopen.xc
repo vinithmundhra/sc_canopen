@@ -37,7 +37,7 @@
  ---------------------------------------------------------------------------*/
 //Circle slot CAN node
 on tile[1]: can_ports_t p_can_circle = {XS1_PORT_1L, XS1_PORT_1I, 8, 8, 8, 4};
-on tile[1]: can_clock_t t_can_circle = {2, XS1_CLKBLK_1};
+on tile[1]: can_clock_t t_can_circle = {8, XS1_CLKBLK_1}; //8-125k
 on tile[1]: port shutdown = XS1_PORT_4E;
 
 on tile[1]: port p_led = XS1_PORT_4A;
@@ -63,6 +63,8 @@ void application(streaming chanend c_application)
   unsigned button_press_1, button_press_2, time, time_i2c;
   int button = 1, adc_value;
   //char led0 = 0xF, led1 = 0xF, led2 = 0xF, led3 = 0xF;
+
+  printstrln("Canopen Demo...");
 
   p_PORT_BUT_1 :> button_press_1;
   set_port_drive_low(p_PORT_BUT_1);
@@ -118,20 +120,27 @@ void application(streaming chanend c_application)
         break;
       }
       /*----------------------------------------------------------------------*/
-      case i2c_timer when timerafter(time_i2c + TEMP_SENSOR_INTERVAL) :> time_i2c:
-      {
-        i2c_master_rx(0x28, data1, 2, i2cOne); //Read ADC value using I2C read
-        printstrln("Reading Temperature value....");
-        data1[0] = data1[0] & 0x0F;
-        adc_value = (data1[0] << 6) | (data1[1] >> 2);
-        pdo_data[0] = ((adc_value & 0xFF00) >> 8);
-        pdo_data[1] = (adc_value & 0xFF);
-        canopen_client_send_data_to_stack(c_application, 0, 2, pdo_data);
-        break;
-      }
+//      case i2c_timer when timerafter(time_i2c + TEMP_SENSOR_INTERVAL) :> time_i2c:
+//      {
+//        i2c_master_rx(0x28, data1, 2, i2cOne); //Read ADC value using I2C read
+//        printstrln("Reading Temperature value....");
+//        data1[0] = data1[0] & 0x0F;
+//        adc_value = (data1[0] << 6) | (data1[1] >> 2);
+//        pdo_data[0] = ((adc_value & 0xFF00) >> 8);
+//        pdo_data[1] = (adc_value & 0xFF);
+//        canopen_client_send_data_to_stack(c_application, 0, 2, pdo_data);
+//        break;
+//      }
       /*----------------------------------------------------------------------*/
     }//select
   }//while(1)
+}
+
+/*============================================================================*/
+void dummy()
+{
+  set_core_fast_mode_on();
+  while(1){}
 }
 
 /*============================================================================*/
@@ -143,6 +152,11 @@ int main()
   {
     on tile[1]: canopen_server(c_rx_tx, c_application);
     on tile[1]: application(c_application);
+//    on tile[1]: dummy();
+//    on tile[1]: dummy();
+//    on tile[1]: dummy();
+//    on tile[1]: dummy();
+//    on tile[1]: dummy();
     on tile[1]:
     {
       shutdown <: 0;

@@ -93,7 +93,7 @@ void emcy_reset_error_register();
 * \return none
 **/
 void emcy_send_emergency_message(streaming chanend c_rx_tx,
-                                 can_state_t &can_state,
+                                 can_state_t can_state,
                             char error_type,
                             unsigned emergency_code,
                             REFERENCE_PARAM(char, error_index_pointer),

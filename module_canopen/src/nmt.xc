@@ -16,7 +16,6 @@
 /*---------------------------------------------------------------------------
  include files
  ---------------------------------------------------------------------------*/
-#include "can_util.h"
 #include "canopen.h"
 #include "pdo.h"
 #include "od.h"
@@ -26,7 +25,7 @@
  Send Heartbeat message on to the CAN network
  ---------------------------------------------------------------------------*/
 void nmt_send_heartbeat_message(streaming chanend c_rx_tx,
-                                can_state_t &can_state,
+                                can_state_t can_state,
                             can_frame_t frame,
                             unsigned char canopen_state)
 {
@@ -56,7 +55,7 @@ void nmt_send_heartbeat_message(streaming chanend c_rx_tx,
   if(canopen_state != RESET_NODE)
   {
     frame.id = NG_HEARTBEAT;
-    can_send_blocking(c_rx_tx, can_state, frame);
+    while(can_send(can_state, frame) != 0);
   }
 }
 
@@ -65,7 +64,7 @@ void nmt_send_heartbeat_message(streaming chanend c_rx_tx,
  Send node guard message on to the CAN network
  ---------------------------------------------------------------------------*/
 void nmt_send_nodeguard_message(streaming chanend c_rx_tx,
-                                can_state_t &can_state,
+                                can_state_t can_state,
                             can_frame_t frame,
                             char toggle,
                             unsigned char state)
@@ -88,7 +87,7 @@ void nmt_send_nodeguard_message(streaming chanend c_rx_tx,
   }
   frame.id = NG_HEARTBEAT;
   frame.dlc = 1;
-  can_send_blocking(c_rx_tx, can_state, frame);
+  while(can_send(can_state, frame) != 0);
   toggle = !toggle;
 }
 
@@ -96,14 +95,14 @@ void nmt_send_nodeguard_message(streaming chanend c_rx_tx,
 /*---------------------------------------------------------------------------
  Send bootup message on to the CAN network
  ---------------------------------------------------------------------------*/
-void nmt_send_boot_up_message(streaming chanend c_rx_tx, can_state_t &can_state)
+void nmt_send_boot_up_message(streaming chanend c_rx_tx, can_state_t can_state)
 {
   can_frame_t frame;
   frame.dlc = 0;
   frame.id = NG_HEARTBEAT;
   frame.remote = 0;
   frame.extended = 0;
-  can_send_blocking(c_rx_tx, can_state, frame);
+  while(can_send(can_state, frame) != 0);
 }
 
 

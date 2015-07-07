@@ -20,14 +20,13 @@
 #include "canopen.h"
 #include "lss.h"
 #include "od.h"
-#include "can_util.h"
 #include "emcy.h"
 
 
 /*---------------------------------------------------------------------------
  Send LSS node ID to the LSS master
  ---------------------------------------------------------------------------*/
-void lss_send_node_id(streaming chanend c_rx_tx, can_state_t &can_state)
+void lss_send_node_id(streaming chanend c_rx_tx, can_state_t can_state)
 {
   can_frame_t frame;
   frame.dlc = 8;
@@ -42,13 +41,13 @@ void lss_send_node_id(streaming chanend c_rx_tx, can_state_t &can_state)
   frame.data[5] = 0;
   frame.data[6] = 0;
   frame.data[7] = 0;
-  can_send_blocking(c_rx_tx, can_state, frame);
+  while(can_send(can_state, frame) != 0);
 }
 
 /*---------------------------------------------------------------------------
  Configure LSS node id based on configure command send by the LSS master
  ---------------------------------------------------------------------------*/
-void lss_configure_node_id_response(streaming chanend c_rx_tx, can_state_t &can_state, char configuration_status)
+void lss_configure_node_id_response(streaming chanend c_rx_tx, can_state_t can_state, char configuration_status)
 {
   can_frame_t frame;
   frame.dlc = 8;
@@ -66,14 +65,14 @@ void lss_configure_node_id_response(streaming chanend c_rx_tx, can_state_t &can_
   frame.data[5] = 0;
   frame.data[6] = 0;
   frame.data[7] = 0;
-  can_send_blocking(c_rx_tx, can_state, frame);
+  while(can_send(can_state, frame) != 0);
 }
 
 /*---------------------------------------------------------------------------
  Configure LSS bit time based on configure command send by the LSS master
  ---------------------------------------------------------------------------*/
 void lss_configure_bit_timing_response(streaming chanend c_rx_tx,
-                                       can_state_t &can_state,
+                                       can_state_t can_state,
                                        char configuration_status)
 {
   can_frame_t frame;
@@ -92,14 +91,14 @@ void lss_configure_bit_timing_response(streaming chanend c_rx_tx,
   frame.data[5] = 0;
   frame.data[6] = 0;
   frame.data[7] = 0;
-  can_send_blocking(c_rx_tx, can_state, frame);
+  while(can_send(can_state, frame) != 0);
 }
 
 /*---------------------------------------------------------------------------
  Store LSS settings based on store command send by the LSS master
  ---------------------------------------------------------------------------*/
 void lss_store_config_settings_response(streaming chanend c_rx_tx,
-                                        can_state_t &can_state,
+                                        can_state_t can_state,
                                         char configuration_status)
 {
   can_frame_t frame;
@@ -118,14 +117,14 @@ void lss_store_config_settings_response(streaming chanend c_rx_tx,
   frame.data[5] = 0;
   frame.data[6] = 0;
   frame.data[7] = 0;
-  can_send_blocking(c_rx_tx, can_state, frame);
+  while(can_send(can_state, frame) != 0);
 }
 
 /*---------------------------------------------------------------------------
  Send LSS Vendor ID based on LSS master Inquiry
  ---------------------------------------------------------------------------*/
 void lss_inquire_vendor_id_response(streaming chanend c_rx_tx,
-                                    can_state_t &can_state,
+                                    can_state_t can_state,
                                     REFERENCE_PARAM(char, canopen_state),
                                     REFERENCE_PARAM(unsigned char,
                                                     error_index_pointer))
@@ -148,7 +147,7 @@ void lss_inquire_vendor_id_response(streaming chanend c_rx_tx,
     frame.data[5] = 0;
     frame.data[6] = 0;
     frame.data[7] = 0;
-    can_send_blocking(c_rx_tx, can_state, frame);
+    while(can_send(can_state, frame) != 0);
   }
   else
   {
@@ -165,7 +164,7 @@ void lss_inquire_vendor_id_response(streaming chanend c_rx_tx,
  Send LSS Product code based on LSS master Inquiry
  ---------------------------------------------------------------------------*/
 void lss_inquire_product_code(streaming chanend c_rx_tx,
-                              can_state_t &can_state,
+                              can_state_t can_state,
                               REFERENCE_PARAM(char, canopen_state),
                               REFERENCE_PARAM(unsigned char,
                                               error_index_pointer))
@@ -188,7 +187,7 @@ void lss_inquire_product_code(streaming chanend c_rx_tx,
     frame.data[5] = 0;
     frame.data[6] = 0;
     frame.data[7] = 0;
-    can_send_blocking(c_rx_tx, can_state, frame);
+    while(can_send(can_state, frame) != 0);
   }
   else
   {
@@ -205,7 +204,7 @@ void lss_inquire_product_code(streaming chanend c_rx_tx,
  Send LSS Revision Number based on LSS master Inquiry
  ---------------------------------------------------------------------------*/
 void lss_inquire_revision_number(streaming chanend c_rx_tx,
-                                 can_state_t &can_state,
+                                 can_state_t can_state,
                                  REFERENCE_PARAM(char, canopen_state),
                                  REFERENCE_PARAM(unsigned char,
                                                  error_index_pointer))
@@ -228,7 +227,7 @@ void lss_inquire_revision_number(streaming chanend c_rx_tx,
     frame.data[5] = 0;
     frame.data[6] = 0;
     frame.data[7] = 0;
-    can_send_blocking(c_rx_tx, can_state, frame);
+    while(can_send(can_state, frame) != 0);
   }
   else
   {
@@ -245,7 +244,7 @@ void lss_inquire_revision_number(streaming chanend c_rx_tx,
  Send LSS Serial Number based on LSS master Inquiry
  ---------------------------------------------------------------------------*/
 void lss_inquire_serial_number(streaming chanend c_rx_tx,
-                               can_state_t &can_state,
+                               can_state_t can_state,
                                REFERENCE_PARAM(char, canopen_state),
                                REFERENCE_PARAM(unsigned char,
                                                error_index_pointer))
@@ -268,7 +267,7 @@ void lss_inquire_serial_number(streaming chanend c_rx_tx,
     frame.data[5] = 0;
     frame.data[6] = 0;
     frame.data[7] = 0;
-    can_send_blocking(c_rx_tx, can_state, frame);
+    while(can_send(can_state, frame) != 0);
   }
   else
   {

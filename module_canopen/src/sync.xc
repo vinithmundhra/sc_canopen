@@ -36,7 +36,7 @@ void sync_pdo_data_transmit(char pdo_number,
                             NULLABLE_ARRAY_OF(tpdo_inhibit_time,
                                               tpdo_inhibit_time_values),
                                               streaming chanend c_rx_tx,
-                                              can_state_t &can_state)
+                                              can_state_t can_state)
 {
   if (rtr_check == TRUE) //pdo exists and no RTR set
   {
