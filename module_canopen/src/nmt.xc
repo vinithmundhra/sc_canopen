@@ -27,7 +27,7 @@
 void nmt_send_heartbeat_message(streaming chanend c_rx_tx,
                                 can_state_t can_state,
                             can_frame_t frame,
-                            unsigned char canopen_state)
+                            unsigned char &canopen_state)
 {
   frame.dlc = 1;
   frame.extended = 0;
@@ -55,8 +55,10 @@ void nmt_send_heartbeat_message(streaming chanend c_rx_tx,
   if(canopen_state != RESET_NODE)
   {
     frame.id = NG_HEARTBEAT;
-    while(can_send(can_state, frame) != 0);
+    frame.dlc = 0;
+    canopen_state = PRE_OPERATIONAL;
   }
+  while(can_send(can_state, frame) != 0);
 }
 
 

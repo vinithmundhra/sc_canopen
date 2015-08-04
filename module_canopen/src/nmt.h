@@ -41,7 +41,7 @@ void nmt_initialize(NULLABLE_ARRAY_OF(tx_sync_timer, sync_timer),
 void nmt_send_heartbeat_message(streaming chanend c_rx_tx,
                                 can_state_t can_state,
                             can_frame_t frame,
-                            unsigned char canopen_state);
+                            unsigned char &canopen_state);
 
 /*==========================================================================*/
 /**

@@ -272,7 +272,7 @@ void canopen_server(streaming chanend c_rx_tx, streaming chanend c_application)
                   if(canopen_state != frame.data[0])
                   {
                     state_changed=1;
-                  canopen_state=frame.data[0];
+                    canopen_state=frame.data[0];
                     nmt_send_heartbeat_message(c_rx_tx, can_state, frame, canopen_state); //TODO:Added
                   }
                 }
@@ -470,8 +470,6 @@ void canopen_server(streaming chanend c_rx_tx, streaming chanend c_application)
 
                           if(can_rx_flag == 0) break;
                           can_rx_flag = 0;
-
-
 
                         if(((frame.data[0]>>4)&0x01) == sdo_toggle) //check for sdo toggle bit
                         {

@@ -90,7 +90,6 @@ enum cob_id
   TLSS_MESSAGE          = 0x7E4                    /**<CANOpen COB-ID transmit LSS Message */
 };
 
-
 void canopen_server(streaming chanend c_rx_tx, streaming chanend c_application);
 
 #endif
