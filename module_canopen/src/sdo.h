@@ -16,7 +16,9 @@ enum sdo_request_types
   INTITATE_DWNLD_DATA_LEN_UNKNOWN       = 0x22, /**<CANOpen sdo request unknown length data download */
   NON_EXPEDITED_DWNLD_REQUEST           = 0x20, /**<CANOpen sdo non expedited download request */
   NON_EXPEDITED_DWNLD_SEGMENTED_REQUEST = 0x21, /**<CANOpen sdo segmenetd download request */
-  INITIATE_SDO_UPLOAD_REQUEST           = 0x40  /**<CANOpen sdo initiate upload request */
+  INITIATE_SDO_UPLOAD_REQUEST           = 0x40, /**<CANOpen sdo initiate upload request */
+  SDO_BLOCK_UPLOAD_INITIATE             = 0xA0,
+  SDO_BLOCK_DNLOAD_INITIATE             = 0xC2
 };
 
 /**
@@ -134,6 +136,25 @@ void sdo_upload_segmented_data(streaming chanend c_rx_tx,
                            char segment_number);
 
 
+void sdo_block_upload_initiate_response(streaming chanend c_rx_tx,
+                                        can_state_t can_state,
+                                        int od_index,
+                                        char od_sub_index,
+                                        char data_length);
+
+void sdo_block_upload_subblock(streaming chanend c_rx_tx,
+                               can_state_t can_state,
+                               int od_index,
+                               char od_sub_index,
+                               char sdo_toggle,
+                               char data_length,
+                               char data_buffer[],
+                               char segment_number);
+
+void sdo_block_download_initiate_response(int od_index,
+                                          char od_sub_index,
+                                          streaming chanend c_rx_tx,
+                                          can_state_t can_state);
 
 /*==========================================================================*/
 /**

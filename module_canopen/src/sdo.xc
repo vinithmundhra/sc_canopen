@@ -77,6 +77,29 @@ void sdo_send_download_response(int od_index,
 }
 
 /*---------------------------------------------------------------------------
+ Send SDO block download initiate response
+ ---------------------------------------------------------------------------*/
+void sdo_block_download_initiate_response(int od_index,
+                                          char od_sub_index,
+                                          streaming chanend c_rx_tx,
+                                          can_state_t can_state){
+  can_frame_t frame;
+  frame.id = TSDO_MESSAGE;
+  frame.extended = 0;
+  frame.remote = 0;
+  frame.dlc = 8;
+  frame.data[0] = 0b01100000;
+  frame.data[1] = od_index & 0xFF;
+  frame.data[2] = (od_index & 0xFF00) >> 8;
+  frame.data[3] = od_sub_index;
+  frame.data[4] = 1;
+  frame.data[5] = 0;
+  frame.data[6] = 0;
+  frame.data[7] = 0;
+  while(can_send(can_state, frame) != 0);
+}
+
+/*---------------------------------------------------------------------------
  Download SDO Segmented Data
  ---------------------------------------------------------------------------*/
 void sdo_download_segment_response(streaming chanend c_rx_tx, can_state_t can_state, char sdo_toggle)
@@ -115,10 +138,10 @@ void sdo_initiate_upload_response(streaming chanend c_rx_tx,
   frame.data[1] = od_index & 0xFF;
   frame.data[2] = (od_index & 0xFF00) >> 8;
   frame.data[3] = od_sub_index;
-  frame.data[4] = 0;
+  frame.data[4] = (data_length & 0xFF);
   frame.data[5] = 0;
   frame.data[6] = 0;
-  frame.data[7] = 0;
+  frame.data[7] = (data_length & 0xFF00) >> 8;
   while(can_send(can_state, frame) != 0);
 }
 
@@ -135,17 +158,12 @@ void sdo_upload_segmented_data(streaming chanend c_rx_tx,
                            char segment_number)
 {
   can_frame_t frame;
-  char no_of_segments = 0, no_of_data_bytes, counter = 0;
-  if (data_length % 7 == 0)
-    no_of_segments = data_length / 7;
-  else
-    no_of_segments = (data_length / 7) + 1;
-  if (segment_number == no_of_segments - 1)
+  char no_of_data_bytes, counter = 0;
+  char number_of_segments = (data_length % 7) ? (data_length / 7 + 1) : (data_length / 7);
+
+  if (segment_number == number_of_segments - 1)
   {
-    if(data_length != 7)
-      no_of_data_bytes = data_length % 7;
-    else
-      no_of_data_bytes = 7;
+    no_of_data_bytes = (data_length != 7) ? (data_length % 7) : 7;
     while(counter != 7)
     {
       if (counter < no_of_data_bytes)
@@ -156,9 +174,11 @@ void sdo_upload_segmented_data(streaming chanend c_rx_tx,
         frame.data[counter + 1] = 0;
       counter++;
     }
+    frame.data[0] = 0x00 | (sdo_toggle << 4) | (0x01) | ((7 - no_of_data_bytes) << 1);
   }
   else
   {
+    frame.data[0] = 0x00 | (sdo_toggle << 4);
     frame.data[1] = data_buffer[segment_number * 7];
     frame.data[2] = data_buffer[(segment_number * 7) + 1];
     frame.data[3] = data_buffer[(segment_number * 7) + 2];
@@ -171,7 +191,94 @@ void sdo_upload_segmented_data(streaming chanend c_rx_tx,
   frame.extended = 0;
   frame.remote = 0;
   frame.dlc = 8;
-  frame.data[0] = 0x00 | (sdo_toggle << 4);
+  //frame.data[0] = 0x00 | (sdo_toggle << 4);
+  while(can_send(can_state, frame) != 0);
+}
+
+/*---------------------------------------------------------------------------
+ Initiate SDO Upload Response
+ ---------------------------------------------------------------------------*/
+void sdo_block_upload_initiate_response(streaming chanend c_rx_tx,
+                                        can_state_t can_state,
+                                        int od_index,
+                                        char od_sub_index,
+                                        char data_length)
+{
+  can_frame_t frame;
+  frame.id = TSDO_MESSAGE;
+  frame.extended = 0;
+  frame.remote = 0;
+  frame.dlc = 8;
+  frame.data[0] = 0xC2;
+  frame.data[1] = od_index & 0xFF;
+  frame.data[2] = (od_index & 0xFF00) >> 8;
+  frame.data[3] = od_sub_index;
+  frame.data[4] = (data_length & 0xFF);
+  frame.data[5] = 0;
+  frame.data[6] = 0;
+  frame.data[7] = (data_length & 0xFF00) >> 8;
+  while(can_send(can_state, frame) != 0);
+}
+
+/*---------------------------------------------------------------------------
+ Upload Segmented Data
+ ---------------------------------------------------------------------------*/
+void sdo_block_upload_subblock(streaming chanend c_rx_tx,
+                               can_state_t can_state,
+                               int od_index,
+                               char od_sub_index,
+                               char sdo_toggle,
+                               char data_length,
+                               char data_buffer[],
+                               char segment_number)
+{
+  can_frame_t frame;
+  char no_of_data_bytes, counter = 0;
+  char number_of_segments = (data_length % 7) ? (data_length / 7 + 1) : (data_length / 7);
+
+  if (segment_number == number_of_segments - 1)
+  {
+    no_of_data_bytes = (data_length != 7) ? (data_length % 7) : 7;
+    while(counter != 7)
+    {
+      if (counter < no_of_data_bytes)
+      {
+        frame.data[counter + 1] = data_buffer[(segment_number * 7) + counter];
+      }
+      else
+        frame.data[counter + 1] = 0;
+      counter++;
+    }
+    frame.data[0] = (segment_number + 1) | 0x80;
+  }
+  else if(segment_number < number_of_segments - 1)
+  {
+    frame.data[0] = segment_number + 1;
+    frame.data[1] = data_buffer[segment_number * 7];
+    frame.data[2] = data_buffer[(segment_number * 7) + 1];
+    frame.data[3] = data_buffer[(segment_number * 7) + 2];
+    frame.data[4] = data_buffer[(segment_number * 7) + 3];
+    frame.data[5] = data_buffer[(segment_number * 7) + 4];
+    frame.data[6] = data_buffer[(segment_number * 7) + 5];
+    frame.data[7] = data_buffer[(segment_number * 7) + 6];
+  }
+  else
+  {
+    frame.data[0] = 0xC1;
+    frame.data[1] = 0x00;
+    frame.data[2] = 0x00;
+    frame.data[3] = 0x00;
+    frame.data[4] = 0x00;
+    frame.data[5] = 0x00;
+    frame.data[6] = 0x00;
+    frame.data[7] = 0x00;
+  }
+
+  frame.id = TSDO_MESSAGE;
+  frame.extended = 0;
+  frame.remote = 0;
+  frame.dlc = 8;
+  //frame.data[0] = 0x00 | (sdo_toggle << 4);
   while(can_send(can_state, frame) != 0);
 }
 
